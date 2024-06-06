@@ -1,0 +1,991 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API documentation for HFSA application",
+    "version": "1.0.0",
+    "title": "HFSA API"
+  },
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "user",
+      "description": "Operations about users"
+    },
+    {
+      "name": "program",
+      "description": "Operations about programs"
+    },
+    {
+      "name": "event",
+      "description": "Operations about events"
+    },
+    {
+      "name": "donation",
+      "description": "Operations about donations"
+    },
+    {
+      "name":"contact_inquiry",
+      "description":"Operations about contact_inquiry"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "paths": {
+    "/user/users": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get all users",
+        "description": "Retrieve a list of all users",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get a specific user",
+        "description": "Retrieve details of a specific user",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+            
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update a specific user",
+        "description": "Update details of a specific user",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete a specific user",
+        "description": "Delete a specific user by ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/user/register": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Register a new user",
+        "description": "Register a new user",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "User login",
+        "description": "Authenticate user and return token",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/gallery/images": {
+      "get": {
+        "tags": [
+          "gallery"
+        ],
+        "summary": "Get all images",
+        "description": "Retrieve a list of all images",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gallery/image/{id}": {
+      "get": {
+        "tags": [
+          "gallery"
+        ],
+        "summary": "Get a specific image",
+        "description": "Retrieve details of a specific image",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gallery"
+        ],
+        "summary": "Update a specific image",
+        "description": "Update details of a specific image",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "gallery"
+        ],
+        "summary": "Delete a specific image",
+        "description": "Delete a specific image by ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/gallery/upload": {
+      "post": {
+        "tags": [
+          "gallery"
+        ],
+        "summary": "Create a new image",
+        "description": "upload a new image",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "image uploaded successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/program/programs": {
+      "get": {
+        "tags": [
+          "program"
+        ],
+        "summary": "Get all programs",
+        "description": "Retrieve a list of all programs",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                
+              }
+            }
+          }
+        }
+      }
+    },
+    "/program/program/{id}": {
+      "get": {
+        "tags": [
+          "program"
+        ],
+        "summary": "Get a specific program",
+        "description": "Retrieve details of a specific program",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "program"
+        ],
+        "summary": "Update a specific program",
+        "description": "Update details of a specific program",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "program"
+        ],
+        "summary": "Delete a specific program",
+        "description": "Delete a specific program by ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/program/create": {
+      "post": {
+        "tags": [
+          "program"
+        ],
+        "summary": "Create a new program",
+        "description": "Create a new program",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Program created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/event/events": {
+      "get": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Get all events",
+        "description": "Retrieve a list of all events",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+
+              }
+            }
+          }
+        }
+      }
+    },
+    "/event/event/{id}": {
+      "get": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Get a specific event",
+        "description": "Retrieve details of a specific event",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Update a specific event",
+        "description": "Update details of a specific event",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Delete a specific event",
+        "description": "Delete a specific event by ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/event/create": {
+      "post": {
+        "tags": [
+          "event"
+        ],
+        "summary": "Create a new event",
+        "description": "Create a new event",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+
+    "/donation/donations": {
+      "get": {
+        "tags": [
+          "donation"
+        ],
+        "summary": "Get all donations",
+        "description": "Retrieve a list of all donations",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                
+              }
+            }
+          }
+        }
+      }
+    },
+    "/donation/donation/{id}": {
+      "get": {
+        "tags": [
+          "donation"
+        ],
+        "summary": "Get a specific donation",
+        "description": "Retrieve details of a specific donation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "donation"
+        ],
+        "summary": "Update a specific donation",
+        "description": "Update details of a specific donation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "donation"
+        ],
+        "summary": "Delete a specific donation",
+        "description": "Delete a specific donation by ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/donation/create": {
+      "post": {
+        "tags": [
+          "donation"
+        ],
+        "summary": "Create a new donation",
+        "description": "Create a new donation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Donation created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+},
+"/contact-inquiry/inquiries": {
+  "get": {
+    "tags": [
+      "contact_inquiry"
+    ],
+    "summary": "Get all contact inquiries",
+    "description": "Retrieve a list of all contact inquiries",
+    "produces": [
+      "application/json"
+    ],
+    "responses": {
+      "200": {
+        "description": "successful operation",
+        "schema": {
+          "type": "array",
+          "items": {
+            
+          }
+        }
+      }
+    }
+  }
+},
+"/contact-inquiry/inquiry/{id}": {
+  "get": {
+    "tags": [
+      "contact_inquiry"
+    ],
+    "summary": "Get a specific contact inquiry",
+    "description": "Retrieve details of a specific contact inquiry",
+    "produces": [
+      "application/json"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "type": "integer"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "successful operation",
+        "schema": {
+          
+        }
+      }
+    }
+  },
+  "put": {
+    "tags": [
+      "contact_inquiry"
+    ],
+    "summary": "Update a specific contact inquiry",
+    "description": "Update details of a specific contact inquiry",
+    "produces": [
+      "application/json"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "type": "integer"
+      },
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+         
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "successful operation",
+        "schema": {
+          
+        }
+      }
+    },
+    "security": [
+      {
+        "Bearer": []
+      }
+    ]
+  },
+  "delete": {
+    "tags": [
+      "contact_inquiry"
+    ],
+    "summary": "Delete a specific contact inquiry",
+    "description": "Delete a specific contact inquiry by ID",
+    "produces": [
+      "application/json"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "type": "integer"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "successful operation"
+      }
+    },
+    "security": [
+      {
+        "Bearer": []
+      }
+    ]
+  }
+},
+"/contact-inquiry/create": {
+  "post": {
+    "tags": [
+      "contact_inquiry"
+    ],
+    "summary": "Create a new contact inquiry",
+    "description": "Create a new contact inquiry",
+    "produces": [
+      "application/json"
+    ],
+    "parameters": [
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+          
+        }
+      }
+    ],
+    "responses": {
+      "201": {
+        "description": "Contact inquiry created successfully"
+      },
+      "400": {
+        "description": "Invalid input"
+      }
+    }
+  }
+}
+}
+}
