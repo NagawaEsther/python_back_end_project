@@ -3,8 +3,21 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from hfsa_app.models.donations import Donation
 from hfsa_app import db
 from datetime import datetime
+from functools import wraps
 
 donation_bp = Blueprint('donation', __name__, url_prefix='/api/v1/donation')
+
+
+# Admin required decorator
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Create a new donation
 @donation_bp.route('/create', methods=['POST'])
@@ -47,6 +60,7 @@ def create_donation():
 
 # Get all donations
 @donation_bp.route('/donations', methods=['GET'])
+@admin_required
 def get_all_donations():
     try:
         donations = Donation.query.all()
@@ -68,6 +82,7 @@ def get_all_donations():
 
 # Get a specific donation
 @donation_bp.route('/donation/<int:id>', methods=['GET'])
+@admin_required
 def get_donation(id):
     try:
         donation = Donation.query.get_or_404(id)
@@ -86,9 +101,11 @@ def get_donation(id):
 
 # Update a donation (public access with email verification)
 @donation_bp.route('/donation/<int:id>', methods=['PUT'])
+@jwt_required()
 def update_donation(id):
     donation = Donation.query.get_or_404(id)
     data = request.get_json()
+    user_info = get_jwt_identity()
 
     if data.get('donor_email') != donation.donor_email:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -118,9 +135,11 @@ def update_donation(id):
 
 # Delete a donation (public access with email verification)
 @donation_bp.route('/donation/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_donation(id):
     donation = Donation.query.get_or_404(id)
     data = request.get_json()
+    user_info = get_jwt_identity()
 
     if data.get('donor_email') != donation.donor_email:
         return jsonify({'error': 'Unauthorized'}), 403

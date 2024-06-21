@@ -1,8 +1,22 @@
 from flask import Blueprint, request, jsonify
 from hfsa_app import db
 from hfsa_app.models.contact_inquiry import ContactInquiry
+from functools import wraps
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 contact_inquiry_bp = Blueprint('contact_inquiry', __name__, url_prefix='/api/v1/contact-inquiry')
+
+
+#Admin required
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()  # Ensure the user is authenticated with a JWT
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Create a new contact inquiry (public access)
 @contact_inquiry_bp.route('/create', methods=['POST'])
@@ -32,6 +46,7 @@ def create_contact_inquiry():
 
 # Get all contact inquiries (public access)
 @contact_inquiry_bp.route('/inquiries', methods=['GET'])
+@admin_required
 def get_all_contact_inquiries():
     inquiries = ContactInquiry.query.all()
     output = []
@@ -50,6 +65,7 @@ def get_all_contact_inquiries():
 
 # Get a specific contact inquiry (public access)
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['GET'])
+@admin_required
 def get_contact_inquiry(id):
     inquiry = ContactInquiry.query.get_or_404(id)
     inquiry_data = {
@@ -65,9 +81,11 @@ def get_contact_inquiry(id):
 
 # Update a contact inquiry (public access with email verification)
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['PUT'])
+@jwt_required()
 def update_contact_inquiry(id):
     inquiry = ContactInquiry.query.get_or_404(id)
     data = request.get_json()
+    user_info = get_jwt_identity()
 
     if data.get('email') != inquiry.email:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -93,9 +111,11 @@ def update_contact_inquiry(id):
 
 # Delete a contact inquiry (public access with email verification)
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_contact_inquiry(id):
     inquiry = ContactInquiry.query.get_or_404(id)
     data = request.get_json()
+    user_info = get_jwt_identity()
 
     if data.get('email') != inquiry.email:
         return jsonify({'error': 'Unauthorized'}), 403

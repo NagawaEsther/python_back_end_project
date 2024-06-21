@@ -1,9 +1,21 @@
 from flask import Blueprint, request, jsonify
 from hfsa_app import db
 from hfsa_app.models.gallery import Gallery
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from functools import wraps
 
 gallery_bp = Blueprint('gallery', __name__, url_prefix='/api/v1/gallery')
 
+# Admin required decorator
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 # Get all images in the gallery (public access)
 @gallery_bp.route('/images', methods=['GET'])
 def get_all_images():
@@ -35,6 +47,7 @@ def get_image(id):
 
 # Upload a new image to the gallery (public access)
 @gallery_bp.route('/upload', methods=['POST'])
+@admin_required
 def upload_image():
     try:
         data = request.get_json()
@@ -59,6 +72,7 @@ def upload_image():
 
 # Update an image in the gallery (public access)
 @gallery_bp.route('/image/<int:id>', methods=['PUT'])
+@admin_required
 def update_image(id):
     image = Gallery.query.get_or_404(id)
     data = request.get_json()
@@ -81,6 +95,7 @@ def update_image(id):
 
 # Delete an image from the gallery (public access)
 @gallery_bp.route('/image/<int:id>', methods=['DELETE'])
+@admin_required
 def delete_image(id):
     image = Gallery.query.get_or_404(id)
     try:

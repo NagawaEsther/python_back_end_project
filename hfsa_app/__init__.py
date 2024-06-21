@@ -9,6 +9,7 @@ from flask import Flask, jsonify, send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask import send_from_directory
 import os  
+from flask_cors import CORS
 
 #importing bluebrints
 from hfsa_app.controllers.user_controller import user_bp
@@ -18,8 +19,10 @@ from hfsa_app.controllers.gallery_controllers import gallery_bp
 from hfsa_app.controllers.contact_inquiry_controller import contact_inquiry_bp
 from hfsa_app.controllers.donations_controller import donation_bp
 
+
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object('config.Config')
 
     # Initialize database
@@ -39,7 +42,7 @@ def create_app():
     from hfsa_app.models import events
     from hfsa_app.models import contact_inquiry
     from hfsa_app.models import donations
-
+    
 
      # Import blueprints
     from hfsa_app.controllers.user_controller import User
@@ -52,7 +55,7 @@ def create_app():
     app.register_blueprint(gallery_bp,url_prefix='/api/v1/gallery')
     app.register_blueprint(contact_inquiry_bp,url_prefix='/api/v1/contact-inquiry')
     app.register_blueprint(donation_bp,url_prefix='/api/v1/donation')
-
+    
 
 
     # Serve Swagger JSON file

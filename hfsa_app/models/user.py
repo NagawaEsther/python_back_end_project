@@ -19,7 +19,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
-    def __init__(self, name, email, password, role, date_of_birth, contact_number, address, profile_picture=None):
+    def __init__(self, name, email, password, role, date_of_birth, contact_number, address):
         self.name = name
         self.email = email
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -27,7 +27,7 @@ class User(db.Model):
         self.date_of_birth = date_of_birth
         self.contact_number = contact_number
         self.address = address
-        self.profile_picture = profile_picture
+       
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)

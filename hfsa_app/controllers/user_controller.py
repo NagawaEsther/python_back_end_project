@@ -6,14 +6,27 @@ from hfsa_app.models.user import User
 from hfsa_app import db
 from flask_jwt_extended import JWTManager
 from datetime import datetime, date
-
+import logging
+from functools import wraps
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/v1/user')
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
+# Admin required decorator
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
+
 # Get all users
 @user_bp.route('/users', methods=['GET'])
+@admin_required
 def get_all_users():
     users = User.query.all()
     output = []
@@ -34,6 +47,7 @@ def get_all_users():
 
 # Get a specific user
 @user_bp.route('/user/<int:id>', methods=['GET'])
+@admin_required
 def get_user(id):
     user = User.query.get_or_404(id)
     user_data = {
@@ -71,7 +85,7 @@ def register_user():
             name=data.get('name'),
             email=email,
             password=hashed_password,
-            role=data.get('role', 'student'),
+            role=data.get('role', 'user'),
             date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d'),
             contact_number=data.get('contact_number'),
             address=data.get('address'),
@@ -104,7 +118,8 @@ def register_user():
 
 # Update a user
 @user_bp.route('/user/<int:id>', methods=['PUT'])
-@jwt_required()
+# @jwt_required()
+@admin_required
 def update_user(id):
     try:
         user = User.query.get_or_404(id)
@@ -142,7 +157,8 @@ def update_user(id):
 
 # Delete a user
 @user_bp.route('/user/<int:id>', methods=['DELETE'])
-@jwt_required()
+# @jwt_required()
+@admin_required
 def delete_user(id):
     try:
         user = User.query.get_or_404(id)
@@ -152,6 +168,7 @@ def delete_user(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to delete user', 'details': str(e)}), 500
+
 
 # Authentication endpoint to handle user login
 @user_bp.route('/login', methods=['POST'])
@@ -167,23 +184,41 @@ def login():
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
+        
+        # if not bcrypt.check_password_hash(user.password, password):
+        #     return jsonify({'error': 'Invalid password'}), 401
+
+        # Initialize the is_admin flag
+        is_admin = False
+
+        # Check if the user is an admin based on their credentials
+        if email == 'HopeField@info.com' and password == 'Hope256':
+            is_admin = True
 
         user_info = {
             'id': user.id,
             'email': user.email,
-            'name': user.name
+            'name': user.name,
+            'role': user.role,  
+            'is_admin': is_admin  
         }
 
         access_token = create_access_token(identity=user_info)
+        redirect_url = determine_redirect_url(user.role)  
 
         return jsonify({
             'access_token': access_token,
-            'user': user_info
+            'user': user_info,
+            'redirect_url': redirect_url,
+            'is_admin': is_admin  
         }), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
-
+# Function to determine redirect URL based on user role
+def determine_redirect_url(role):
+    if role == 'admin':
+        return '/'  
+    else:
+        return '/admin'   

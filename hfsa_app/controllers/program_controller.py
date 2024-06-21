@@ -1,10 +1,22 @@
 from flask import Blueprint, request, jsonify
 from hfsa_app import db
 from hfsa_app.models.program import Program
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required,get_jwt_identity
 from datetime import datetime
+from functools import wraps
 
 program_bp = Blueprint('program', __name__, url_prefix='/api/v1/program')
+
+#Admin required
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()  # Ensure the user is authenticated with a JWT
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Get all programs
 @program_bp.route('/programs', methods=['GET'])
@@ -45,7 +57,7 @@ def get_program(id):
 
 # Create a new program
 @program_bp.route('/register', methods=['POST'])
-@jwt_required() # Requires JWT for access
+@admin_required
 def create_program():
     try:
         data = request.get_json()
@@ -82,7 +94,7 @@ def create_program():
 
 # Update a program
 @program_bp.route('/program/<int:id>', methods=['PUT'])
-@jwt_required()  # Requires JWT for access
+@admin_required
 def update_program(id):
     try:
         program = Program.query.get_or_404(id)
@@ -120,7 +132,8 @@ def update_program(id):
 
 # Delete a program
 @program_bp.route('/program/<int:id>', methods=['DELETE'])
-@jwt_required()  # Requires JWT for access
+@admin_required
+# @jwt_required()  
 def delete_program(id):
     try:
         program = Program.query.get_or_404(id)

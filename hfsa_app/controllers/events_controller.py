@@ -2,9 +2,21 @@ from flask import Blueprint, request, jsonify
 from hfsa_app import db
 from hfsa_app.models.events import Event
 from datetime import datetime
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required,get_jwt_identity
+from functools import wraps
 
 event_bp = Blueprint('event', __name__, url_prefix='/api/v1/event')
+
+# Admin required decorator
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        user_info = get_jwt_identity()
+        if user_info['role'] != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Get all events
 @event_bp.route('/events', methods=['GET'])
@@ -43,7 +55,8 @@ def get_event(id):
 
 # Create a new event
 @event_bp.route('/create', methods=['POST'])
-@jwt_required()  # Requires JWT for access
+@admin_required
+# @jwt_required()  # Requires JWT for access
 def create_event():
     try:
         data = request.get_json()
@@ -80,7 +93,8 @@ def create_event():
 
 # Update an event
 @event_bp.route('/event/<int:id>', methods=['PUT'])
-@jwt_required()  # Requires JWT for access
+@admin_required
+# @jwt_required()  # Requires JWT for access
 def update_event(id):
     try:
         event = Event.query.get_or_404(id)
@@ -117,7 +131,8 @@ def update_event(id):
 
 # Delete an event
 @event_bp.route('/event/<int:id>', methods=['DELETE'])
-@jwt_required()  # Requires JWT for access
+@admin_required
+# @jwt_required()  # Requires JWT for access
 def delete_event(id):
     try:
         event = Event.query.get_or_404(id)
