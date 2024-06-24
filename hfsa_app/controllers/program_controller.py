@@ -10,7 +10,7 @@ program_bp = Blueprint('program', __name__, url_prefix='/api/v1/program')
 #Admin required
 def admin_required(fn):
     @wraps(fn)
-    @jwt_required()  # Ensure the user is authenticated with a JWT
+    @jwt_required()  
     def wrapper(*args, **kwargs):
         user_info = get_jwt_identity()
         if user_info['role'] != 'admin':
@@ -40,6 +40,7 @@ def get_all_programs():
 
 # Get a specific program
 @program_bp.route('/program/<int:id>', methods=['GET'])
+@admin_required
 def get_program(id):
     program = Program.query.get_or_404(id)
     program_data = {
@@ -133,7 +134,6 @@ def update_program(id):
 # Delete a program
 @program_bp.route('/program/<int:id>', methods=['DELETE'])
 @admin_required
-# @jwt_required()  
 def delete_program(id):
     try:
         program = Program.query.get_or_404(id)

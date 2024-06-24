@@ -16,7 +16,7 @@ def admin_required(fn):
             return jsonify({'error': 'Admin access required'}), 403
         return fn(*args, **kwargs)
     return wrapper
-# Get all images in the gallery (public access)
+# Get all images in the gallery 
 @gallery_bp.route('/images', methods=['GET'])
 def get_all_images():
     images = Gallery.query.all()
@@ -32,8 +32,9 @@ def get_all_images():
         output.append(image_data)
     return jsonify({'images': output})
 
-# Get a specific image by ID (public access)
+# Get a specific image by ID 
 @gallery_bp.route('/image/<int:id>', methods=['GET'])
+@admin_required
 def get_image(id):
     image = Gallery.query.get_or_404(id)
     image_data = {
@@ -45,7 +46,7 @@ def get_image(id):
     }
     return jsonify(image_data)
 
-# Upload a new image to the gallery (public access)
+# Upload a new image to the gallery 
 @gallery_bp.route('/upload', methods=['POST'])
 @admin_required
 def upload_image():
@@ -70,7 +71,7 @@ def upload_image():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Update an image in the gallery (public access)
+# Update an image in the gallery 
 @gallery_bp.route('/image/<int:id>', methods=['PUT'])
 @admin_required
 def update_image(id):
@@ -93,7 +94,7 @@ def update_image(id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Delete an image from the gallery (public access)
+# Delete an image from the gallery 
 @gallery_bp.route('/image/<int:id>', methods=['DELETE'])
 @admin_required
 def delete_image(id):

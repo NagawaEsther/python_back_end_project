@@ -5,8 +5,7 @@ from email_validator import validate_email, EmailNotValidError
 from hfsa_app.models.user import User
 from hfsa_app import db
 from flask_jwt_extended import JWTManager
-from datetime import datetime, date
-import logging
+from datetime import datetime
 from functools import wraps
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/v1/user')
@@ -24,7 +23,7 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
-# Get all users
+# Get all users (admin access required)
 @user_bp.route('/users', methods=['GET'])
 @admin_required
 def get_all_users():
@@ -45,7 +44,7 @@ def get_all_users():
         output.append(user_data)
     return jsonify({'users': output})
 
-# Get a specific user
+# Get a specific user (admin access required)
 @user_bp.route('/user/<int:id>', methods=['GET'])
 @admin_required
 def get_user(id):
@@ -81,15 +80,19 @@ def register_user():
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
+        
+        is_admin = False
+        if email == 'HopeField@info.com' and password == 'Hope256':
+            is_admin = True
+
         new_user = User(
             name=data.get('name'),
             email=email,
             password=hashed_password,
-            role=data.get('role', 'user'),
+            role='admin' if is_admin else 'user',
             date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d'),
             contact_number=data.get('contact_number'),
-            address=data.get('address'),
-    
+            address=data.get('address')
         )
 
         db.session.add(new_user)
@@ -103,7 +106,6 @@ def register_user():
             'date_of_birth': new_user.date_of_birth.strftime('%Y-%m-%d'),
             'contact_number': new_user.contact_number,
             'address': new_user.address,
-            
         }
 
         return jsonify({'message': 'User registered successfully', 'user': user_details}), 201
@@ -115,10 +117,8 @@ def register_user():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
-# Update a user
+# Update a user (admin access required)
 @user_bp.route('/user/<int:id>', methods=['PUT'])
-# @jwt_required()
 @admin_required
 def update_user(id):
     try:
@@ -127,17 +127,22 @@ def update_user(id):
 
         user.name = data.get('name', user.name)
         user.email = data.get('email', user.email)
-        user.role = data.get('role', user.role)
         user.date_of_birth = datetime.strptime(data.get('date_of_birth', user.date_of_birth.strftime('%Y-%m-%d')), '%Y-%m-%d')
         user.contact_number = data.get('contact_number', user.contact_number)
         user.address = data.get('address', user.address)
-        
+
         if 'password' in data and data['password']:
             user.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
-        db.session.commit()
         
-        # Return updated user details
+        if 'role' in data:
+            if is_admin(request):  
+                user.role = data['role']
+            else:
+                return jsonify({'error': 'Admin access required to update role'}), 403
+
+        db.session.commit()
+
         user_details = {
             'id': user.id,
             'name': user.name,
@@ -146,18 +151,16 @@ def update_user(id):
             'date_of_birth': user.date_of_birth.strftime('%Y-%m-%d'),
             'contact_number': user.contact_number,
             'address': user.address,
-        
         }
 
-        return jsonify({'message': 'User updated successfully', 'user': user_details})
+        return jsonify({'message': 'User updated successfully', 'user': user_details}), 200
 
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Delete a user
+# Delete a user (admin access required)
 @user_bp.route('/user/<int:id>', methods=['DELETE'])
-# @jwt_required()
 @admin_required
 def delete_user(id):
     try:
@@ -168,7 +171,6 @@ def delete_user(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to delete user', 'details': str(e)}), 500
-
 
 # Authentication endpoint to handle user login
 @user_bp.route('/login', methods=['POST'])
@@ -184,41 +186,27 @@ def login():
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
-        
-        # if not bcrypt.check_password_hash(user.password, password):
-        #     return jsonify({'error': 'Invalid password'}), 401
 
-        # Initialize the is_admin flag
-        is_admin = False
-
-        # Check if the user is an admin based on their credentials
-        if email == 'HopeField@info.com' and password == 'Hope256':
-            is_admin = True
-
+    
+        is_admin = (email == 'HopeField@info.com' and password == 'Hope256')
         user_info = {
             'id': user.id,
             'email': user.email,
             'name': user.name,
-            'role': user.role,  
-            'is_admin': is_admin  
+            'role': user.role,
+            'is_admin': is_admin
         }
 
         access_token = create_access_token(identity=user_info)
-        redirect_url = determine_redirect_url(user.role)  
+        redirect_url = determine_redirect_url(user.role)
 
         return jsonify({
             'access_token': access_token,
             'user': user_info,
             'redirect_url': redirect_url,
-            'is_admin': is_admin  
+            'is_admin': is_admin
         }), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Function to determine redirect URL based on user role
-def determine_redirect_url(role):
-    if role == 'admin':
-        return '/'  
-    else:
-        return '/admin'   

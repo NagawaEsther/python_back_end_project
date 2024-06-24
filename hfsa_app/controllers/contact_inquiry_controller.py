@@ -10,7 +10,7 @@ contact_inquiry_bp = Blueprint('contact_inquiry', __name__, url_prefix='/api/v1/
 #Admin required
 def admin_required(fn):
     @wraps(fn)
-    @jwt_required()  # Ensure the user is authenticated with a JWT
+    @jwt_required()  
     def wrapper(*args, **kwargs):
         user_info = get_jwt_identity()
         if user_info['role'] != 'admin':
@@ -44,7 +44,7 @@ def create_contact_inquiry():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Get all contact inquiries (public access)
+# Get all contact inquiries 
 @contact_inquiry_bp.route('/inquiries', methods=['GET'])
 @admin_required
 def get_all_contact_inquiries():
@@ -63,7 +63,7 @@ def get_all_contact_inquiries():
         output.append(inquiry_data)
     return jsonify({'inquiries': output})
 
-# Get a specific contact inquiry (public access)
+# Get a specific contact inquiry 
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['GET'])
 @admin_required
 def get_contact_inquiry(id):
@@ -79,13 +79,12 @@ def get_contact_inquiry(id):
     }
     return jsonify(inquiry_data)
 
-# Update a contact inquiry (public access with email verification)
+# Update a contact inquiry 
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['PUT'])
-@jwt_required()
+@admin_required  
 def update_contact_inquiry(id):
     inquiry = ContactInquiry.query.get_or_404(id)
     data = request.get_json()
-    user_info = get_jwt_identity()
 
     if data.get('email') != inquiry.email:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -109,18 +108,13 @@ def update_contact_inquiry(id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Delete a contact inquiry (public access with email verification)
+
+# Delete a contact inquiry 
 @contact_inquiry_bp.route('/inquiry/<int:id>', methods=['DELETE'])
-@jwt_required()
+@admin_required  
 def delete_contact_inquiry(id):
-    inquiry = ContactInquiry.query.get_or_404(id)
-    data = request.get_json()
-    user_info = get_jwt_identity()
-
-    if data.get('email') != inquiry.email:
-        return jsonify({'error': 'Unauthorized'}), 403
-
     try:
+        inquiry = ContactInquiry.query.get_or_404(id)
         db.session.delete(inquiry)
         db.session.commit()
         return jsonify({'message': 'Contact inquiry deleted successfully'}), 200

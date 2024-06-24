@@ -99,18 +99,14 @@ def get_donation(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Update a donation (public access with email verification)
+# Update a donation 
 @donation_bp.route('/donation/<int:id>', methods=['PUT'])
-@jwt_required()
+@admin_required
 def update_donation(id):
-    donation = Donation.query.get_or_404(id)
-    data = request.get_json()
-    user_info = get_jwt_identity()
-
-    if data.get('donor_email') != donation.donor_email:
-        return jsonify({'error': 'Unauthorized'}), 403
-
     try:
+        donation = Donation.query.get_or_404(id)
+        data = request.get_json()
+
         donation.donor_name = data.get('donor_name', donation.donor_name)
         donation.donor_email = data.get('donor_email', donation.donor_email)
         donation.donation_amount = data.get('donation_amount', donation.donation_amount)
@@ -127,28 +123,25 @@ def update_donation(id):
             'message': donation.message,
         }
 
-        return jsonify({'message': 'Donation updated successfully', 'donation': donation_data})
+        return jsonify({
+            'message': 'Donation updated successfully',
+            'donation': donation_data
+        })
 
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Delete a donation (public access with email verification)
+
+# Delete a donation 
 @donation_bp.route('/donation/<int:id>', methods=['DELETE'])
-@jwt_required()
+@admin_required
 def delete_donation(id):
-    donation = Donation.query.get_or_404(id)
-    data = request.get_json()
-    user_info = get_jwt_identity()
-
-    if data.get('donor_email') != donation.donor_email:
-        return jsonify({'error': 'Unauthorized'}), 403
-
     try:
+        donation = Donation.query.get_or_404(id)
         db.session.delete(donation)
         db.session.commit()
         return jsonify({'message': 'Donation deleted successfully'}), 200
-
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to delete donation', 'details': str(e)}), 500

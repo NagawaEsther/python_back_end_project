@@ -29,7 +29,7 @@ def get_all_events():
             'name': event.name,
             'description': event.description,
             'date': event.date.strftime('%Y-%m-%d'),
-            'time': event.time.strftime('%H:%M:%S'),
+            'time': event.time.strftime('%H:%M'),
             'location': event.location,
             'registration_required': event.registration_required,
             'max_participants': event.max_participants
@@ -39,6 +39,7 @@ def get_all_events():
 
 # Get a specific event
 @event_bp.route('/event/<int:id>', methods=['GET'])
+@admin_required
 def get_event(id):
     event = Event.query.get_or_404(id)
     event_data = {
@@ -46,7 +47,7 @@ def get_event(id):
         'name': event.name,
         'description': event.description,
         'date': event.date.strftime('%Y-%m-%d'),
-        'time': event.time.strftime('%H:%M:%S'),
+        'time': event.time.strftime('%H:%M'),
         'location': event.location,
         'registration_required': event.registration_required,
         'max_participants': event.max_participants
@@ -56,7 +57,6 @@ def get_event(id):
 # Create a new event
 @event_bp.route('/create', methods=['POST'])
 @admin_required
-# @jwt_required()  # Requires JWT for access
 def create_event():
     try:
         data = request.get_json()
@@ -64,7 +64,7 @@ def create_event():
             name=data['name'],
             description=data['description'],
             date=datetime.strptime(data['date'], '%Y-%m-%d'),
-            time=datetime.strptime(data['time'], '%H:%M:%S'),
+            time=datetime.strptime(data['time'], '%H:%M'),
             location=data['location'],
             registration_required=data['registration_required'],
             max_participants=data.get('max_participants')
@@ -77,7 +77,7 @@ def create_event():
             'name': new_event.name,
             'description': new_event.description,
             'date': new_event.date.strftime('%Y-%m-%d'),
-            'time': new_event.time.strftime('%H:%M:%S'),
+            'time': new_event.time.strftime('%H:%M'),
             'location': new_event.location,
             'registration_required': new_event.registration_required,
             'max_participants': new_event.max_participants
@@ -94,7 +94,6 @@ def create_event():
 # Update an event
 @event_bp.route('/event/<int:id>', methods=['PUT'])
 @admin_required
-# @jwt_required()  # Requires JWT for access
 def update_event(id):
     try:
         event = Event.query.get_or_404(id)
@@ -103,7 +102,7 @@ def update_event(id):
         event.name = data.get('name', event.name)
         event.description = data.get('description', event.description)
         event.date = datetime.strptime(data['date'], '%Y-%m-%d')
-        event.time = datetime.strptime(data['time'], '%H:%M:%S')
+        event.time = datetime.strptime(data['time'], '%H:%M')  
         event.location = data.get('location', event.location)
         event.registration_required = data.get('registration_required', event.registration_required)
         event.max_participants = data.get('max_participants', event.max_participants)
@@ -115,7 +114,7 @@ def update_event(id):
             'name': event.name,
             'description': event.description,
             'date': event.date.strftime('%Y-%m-%d'),
-            'time': event.time.strftime('%H:%M:%S'),
+            'time': event.time.strftime('%H:%M'),
             'location': event.location,
             'registration_required': event.registration_required,
             'max_participants': event.max_participants
@@ -132,7 +131,6 @@ def update_event(id):
 # Delete an event
 @event_bp.route('/event/<int:id>', methods=['DELETE'])
 @admin_required
-# @jwt_required()  # Requires JWT for access
 def delete_event(id):
     try:
         event = Event.query.get_or_404(id)

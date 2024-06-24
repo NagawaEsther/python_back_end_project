@@ -31,7 +31,7 @@ def create_app():
     bcrypt.init_app(app)
 
     # Initialize JWTManager with secret key
-    app.config['JWT_SECRET_KEY'] = '12345'  # secret key
+    app.config['JWT_SECRET_KEY'] = '12345'  
     jwt = JWTManager(app)
 
 
@@ -68,14 +68,14 @@ def create_app():
             return jsonify({"message": "Swagger JSON file not found"}), 404
         
     # Swagger UI configuration
-    SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-    API_URL = '/swagger.json'  # URL to your Swagger JSON file 
+    SWAGGER_URL = '/api/docs'  
+    API_URL = '/swagger.json'  
     
     # Create Swagger UI blueprint
     swaggerui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
         API_URL,
-        config={  # Swagger UI config overrides
+        config={  
             'app_name': "hope_field_sports_academy_app"
         }
     )

