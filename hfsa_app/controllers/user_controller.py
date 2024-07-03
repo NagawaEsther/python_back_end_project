@@ -7,6 +7,8 @@ from hfsa_app import db
 from flask_jwt_extended import JWTManager
 from datetime import datetime
 from functools import wraps
+from werkzeug.security import check_password_hash
+from sqlalchemy import func
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/v1/user')
 bcrypt = Bcrypt()
@@ -38,6 +40,7 @@ def get_all_users():
             'date_of_birth': user.date_of_birth.strftime('%Y-%m-%d'),
             'contact_number': user.contact_number,
             'address': user.address,
+            'sports': user.sports,  
             'created_at': user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else None
         }
@@ -57,6 +60,7 @@ def get_user(id):
         'date_of_birth': user.date_of_birth.strftime('%Y-%m-%d'),
         'contact_number': user.contact_number,
         'address': user.address,
+        'sports': user.sports,  
         'created_at': user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         'updated_at': user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else None
     }
@@ -72,18 +76,26 @@ def register_user():
 
         if not email or not password:
             return jsonify({'error': 'Missing email or password'}), 400
+        
 
         validate_email(email)
+
+        if not User.is_strong_password(password):
+            return jsonify({'error': 'Password must be at least 7 characters long'}), 400
+
 
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already exists'}), 409
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
-        
+           
         is_admin = False
         if email == 'HopeField@info.com' and password == 'Hope256':
             is_admin = True
+
+        sports = data.get('sports')
+        if sports not in ['football', 'netball', 'basketball']:
+            return jsonify({'error': 'Invalid sports selection'}), 400
 
         new_user = User(
             name=data.get('name'),
@@ -92,7 +104,8 @@ def register_user():
             role='admin' if is_admin else 'user',
             date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d'),
             contact_number=data.get('contact_number'),
-            address=data.get('address')
+            address=data.get('address'),
+            sports=sports
         )
 
         db.session.add(new_user)
@@ -106,6 +119,7 @@ def register_user():
             'date_of_birth': new_user.date_of_birth.strftime('%Y-%m-%d'),
             'contact_number': new_user.contact_number,
             'address': new_user.address,
+            'sports': new_user.sports  
         }
 
         return jsonify({'message': 'User registered successfully', 'user': user_details}), 201
@@ -132,14 +146,19 @@ def update_user(id):
         user.address = data.get('address', user.address)
 
         if 'password' in data and data['password']:
-            user.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+            user.password_hash = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
-        
         if 'role' in data:
             if is_admin(request):  
                 user.role = data['role']
             else:
                 return jsonify({'error': 'Admin access required to update role'}), 403
+
+        if 'sports' in data:
+            sports = data['sports']
+            if sports not in ['football', 'netball', 'basketball']:
+                return jsonify({'error': 'Invalid sports selection'}), 400
+            user.sports = sports
 
         db.session.commit()
 
@@ -151,6 +170,7 @@ def update_user(id):
             'date_of_birth': user.date_of_birth.strftime('%Y-%m-%d'),
             'contact_number': user.contact_number,
             'address': user.address,
+            'sports': user.sports  
         }
 
         return jsonify({'message': 'User updated successfully', 'user': user_details}), 200
@@ -181,13 +201,21 @@ def login():
 
         if not email or not password:
             return jsonify({'error': 'Missing email or password'}), 400
+        
+        if len(password) < 7:
+            return jsonify({'error': 'Password must be at least 7 characters long'}), 400
 
         user = User.query.filter_by(email=email).first()
+        if user :
+            is_correct_password= bcrypt.check_password_hash(user.password_hash,password)
+
+        else:
+            return jsonify({'error': 'Invalid email or password'}), 401
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
 
-    
+        
         is_admin = (email == 'HopeField@info.com' and password == 'Hope256')
         user_info = {
             'id': user.id,
@@ -209,4 +237,10 @@ def login():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+def determine_redirect_url(user_role):
+    if user_role == 'admin':
+        return '/admin/dashboard'  
+    else:
+        return '/user/dashboard'
 

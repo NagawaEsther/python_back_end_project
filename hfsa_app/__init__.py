@@ -46,6 +46,7 @@ def create_app():
 
      # Import blueprints
     from hfsa_app.controllers.user_controller import User
+  
     
 
     # Register blueprints

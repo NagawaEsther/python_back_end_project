@@ -3,6 +3,7 @@ from hfsa_app import db
 from hfsa_app.models.gallery import Gallery
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from functools import wraps
+import os
 
 gallery_bp = Blueprint('gallery', __name__, url_prefix='/api/v1/gallery')
 
@@ -51,12 +52,15 @@ def get_image(id):
 @admin_required
 def upload_image():
     try:
+        
         data = request.get_json()
         new_image = Gallery(
             title=data.get('title'),
             description=data.get('description'),
             image_url=data.get('image_url')
         )
+
+
         db.session.add(new_image)
         db.session.commit()
         image_data = {
