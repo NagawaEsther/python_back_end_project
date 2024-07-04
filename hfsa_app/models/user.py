@@ -24,7 +24,7 @@ class User(db.Model):
     def __init__(self, name, email, password_hash, role, date_of_birth, contact_number, address, sports):
         self.name = name
         self.email = email
-        self.password_hash = bcrypt.generate_password_hash(password_hash).decode('utf-8')
+        self.password_hash = password_hash
         self.role = role
         self.date_of_birth = date_of_birth
         self.contact_number = contact_number

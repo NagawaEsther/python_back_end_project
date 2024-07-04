@@ -73,6 +73,7 @@ def register_user():
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
+        print(password)
 
         if not email or not password:
             return jsonify({'error': 'Missing email or password'}), 400
@@ -100,7 +101,7 @@ def register_user():
         new_user = User(
             name=data.get('name'),
             email=email,
-            password=hashed_password,
+            password_hash=hashed_password,
             role='admin' if is_admin else 'user',
             date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d'),
             contact_number=data.get('contact_number'),
@@ -130,6 +131,8 @@ def register_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
 
 # Update a user (admin access required)
 @user_bp.route('/user/<int:id>', methods=['PUT'])
@@ -206,41 +209,39 @@ def login():
             return jsonify({'error': 'Password must be at least 7 characters long'}), 400
 
         user = User.query.filter_by(email=email).first()
-        if user :
-            is_correct_password= bcrypt.check_password_hash(user.password_hash,password)
-
-        else:
-            return jsonify({'error': 'Invalid email or password'}), 401
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
-
         
-        is_admin = (email == 'HopeField@info.com' and password == 'Hope256')
-        user_info = {
+        else :
+          
+          is_correct_password= bcrypt.check_password_hash(user.password_hash,password)
+     
+          if is_correct_password:
+                
+            is_admin = (email == 'HopeField@info.com' and password == 'Hope256')
+            user_info = {
             'id': user.id,
             'email': user.email,
             'name': user.name,
             'role': user.role,
             'is_admin': is_admin
-        }
+            }
 
-        access_token = create_access_token(identity=user_info)
-        redirect_url = determine_redirect_url(user.role)
+            access_token = create_access_token(identity=user_info)
+          
 
-        return jsonify({
-            'access_token': access_token,
-            'user': user_info,
-            'redirect_url': redirect_url,
-            'is_admin': is_admin
-        }), 200
+            return jsonify({
+             'access_token': access_token,
+             'user': user_info,
+             'is_admin': is_admin,
+             'message': 'you logged in successfully '
+             }), 200
 
+          else:
+                return jsonify({'error': 'Invalid password'}), 401
+        
+       
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-def determine_redirect_url(user_role):
-    if user_role == 'admin':
-        return '/admin/dashboard'  
-    else:
-        return '/user/dashboard'
 
