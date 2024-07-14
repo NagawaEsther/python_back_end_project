@@ -34,6 +34,9 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = '12345'  
     jwt = JWTManager(app)
 
+    # Configure token expiration time 
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  
+
 
     #importing models
     from hfsa_app.models import user
